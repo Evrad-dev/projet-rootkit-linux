@@ -1,0 +1,19 @@
+=== Companion Functional Tests ===
+[OK] Help command
+[OK] Status command
+[OK] Missing argument
+[OK] Unknown command
+[OK] Too many arguments
+[OK] Read test file
+[OK] Missing file
+[OK] Device interface unavailable
+=== Output Verification Tests ===
+[OK] Rootkit device unavailable
+[OK] Help output
+[OK] Status output
+[OK] Device response content
+=== Permission Test ===
+[OK] Permission denied
+
+Passed: 13
+Failed: 0
