@@ -244,8 +244,16 @@ static const struct inode_operations chiffrefs_dir_inode_ops = {
 	.lookup = chiffrefs_lookup,
 };
 
+static void chiffrefs_evict_inode(struct inode *inode)
+{
+        kfree(inode->i_private);
+        inode->i_private = NULL;
+        clear_inode(inode);
+}
+
 static const struct super_operations chiffrefs_super_ops = {
-	.statfs = simple_statfs,
+        .statfs = simple_statfs,
+        .evict_inode = chiffrefs_evict_inode,
 };
 
 /* --------------------------------------------------------- */
@@ -292,9 +300,26 @@ static int chiffrefs_fill_super(struct super_block *sb,
 
 static int chiffrefs_get_tree(struct fs_context *fc)
 {
-	pr_info("chiffrefs: get_tree() appelé\n");
+        struct chiffrefs_context *ctx = fc->fs_private;
+        struct path source_path;
+        int ret;
 
-	return get_tree_nodev(fc, chiffrefs_fill_super);
+        if (!ctx || !ctx->source || ctx->source[0] == '\0')
+                return -EINVAL;
+
+        ret = kern_path(ctx->source, LOOKUP_FOLLOW, &source_path);
+        if (ret)
+                return ret;
+
+        if (!d_is_dir(source_path.dentry)) {
+                path_put(&source_path);
+                return -ENOTDIR;
+        }
+
+        path_put(&source_path);
+
+        pr_info("chiffrefs: get_tree() appelé\n");
+        return get_tree_nodev(fc, chiffrefs_fill_super);
 }
 
 /* --------------------------------------------------------- */
@@ -302,41 +327,46 @@ static int chiffrefs_get_tree(struct fs_context *fc)
 /* --------------------------------------------------------- */
 
 static int chiffrefs_parse_param(struct fs_context *fc,
-				 struct fs_parameter *param)
+                                 struct fs_parameter *param)
 {
-	struct chiffrefs_context *ctx = fc->fs_private;
-	int ret;
+        struct chiffrefs_context *ctx = fc->fs_private;
+        int ret;
 
-	pr_info("chiffrefs: parse_param key=%s\n", param->key);
+        if (!ctx || !param || !param->key)
+                return -EINVAL;
 
-	if (strcmp(param->key, "source") == 0) {
-		pr_info("chiffrefs: source=%s\n",
-			param->string ? param->string : "(null)");
+        if (strcmp(param->key, "source") == 0) {
+                char *new_source;
 
-		kfree(ctx->source);
+                if (!param->string || param->string[0] == '\0')
+                        return -EINVAL;
 
-		ctx->source = kstrdup(param->string, GFP_KERNEL);
+                new_source = kstrdup(param->string, GFP_KERNEL);
+                if (!new_source)
+                        return -ENOMEM;
 
-		if (!ctx->source)
-			return -ENOMEM;
+                kfree(ctx->source);
+                ctx->source = new_source;
 
-		return 0;
-	}
+                pr_info("chiffrefs: source=%s\n", ctx->source);
+                return 0;
+        }
 
-	if (strcmp(param->key, "n") == 0) {
-		ret = kstrtoint(param->string, 10, &ctx->n);
+        if (strcmp(param->key, "n") == 0) {
+                if (!param->string)
+                        return -EINVAL;
 
-		if (ret)
-			return ret;
+                ret = kstrtoint(param->string, 10, &ctx->n);
+                if (ret)
+                        return ret;
 
-		pr_info("chiffrefs: n=%d\n", ctx->n);
+                ctx->n = ((ctx->n % 26) + 26) % 26;
+                pr_info("chiffrefs: n=%d\n", ctx->n);
+                return 0;
+        }
 
-		return 0;
-	}
-
-	pr_info("chiffrefs: option inconnue: %s\n", param->key);
-
-	return -EINVAL;
+        pr_err("chiffrefs: option inconnue: %s\n", param->key);
+        return -EINVAL;
 }
 
 /* --------------------------------------------------------- */
