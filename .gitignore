@@ -1,0 +1,70 @@
+# Arbre complet du noyau Linux
+/linux/
+
+# Images disque et machines virtuelles
+*.img
+*.qcow2
+
+# Modules et fichiers de compilation du noyau
+*.ko
+*.o
+*.mod
+*.mod.c
+.*.cmd
+.*.o.d
+Module.symvers
+modules.order
+.modules.order.cmd
+.tmp_versions/
+
+# Fichiers temporaires et sauvegardes
+*~
+*.swp
+*.bak
+
+# Secrets et configurations locales
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa
+id_ed25519
+
+# Environnements Python
+__pycache__/
+.venv/
+venv/
+
+# Exécutables compilés du TP4
+/tp4/miniedr/miniedr
+/tp4/miniedr/jailer
+/tp4/miniedr/miniedr.bpf.o
+
+# Fichiers BPF générés automatiquement
+/tp4/miniedr/vmlinux.h
+/tp4/miniedr/miniedr.skel.h
+
+# README local contenant des identifiants
+/rendu/README.md
+
+# Exécutables de test compilés
+/tp2/hello/test_hello
+/tp2/uptime/test_uptime
+/tp2/version-login_x/test
+/tp3/clear/test
+
+# Sauvegardes de sources
+*.bak
+
+# Fichiers de compilation générés par les modules
+*.mod
+*.mod.c
+.*.cmd
+.*.o.d
+Module.symvers
+modules.order
+.tmp_versions/
+
+# README local avec identifiants
+/rendu/README.md

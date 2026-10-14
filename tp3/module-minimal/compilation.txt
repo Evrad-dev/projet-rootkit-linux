@@ -1,0 +1,17 @@
+=== Date du test ===
+2026-10-13T19:06:44+02:00
+=== Noyau ciblé ===
+7.1.5+kali-amd64
+=== Compilateur ===
+gcc (Debian 16.2.0-1) 16.2.0
+=== Métadonnées du module ===
+filename:       /root/noyau-linux/tp3/module-minimal/hello_module.ko
+version:        1.0
+description:    Module pedagogique minimal illustrant le cycle de vie d'un LKM
+author:         Groupe Projet Noyau Linux
+license:        GPL
+srcversion:     76824AD30A7DBE427B9FBBE
+depends:        
+name:           hello_module
+retpoline:      Y
+vermagic:       7.1.5+kali-amd64 SMP preempt mod_unload 
